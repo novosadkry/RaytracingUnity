@@ -9,12 +9,20 @@ public struct Sphere
     public RayMaterial material;
 }
 
+[ExecuteAlways]
 public class SphereObject : MonoBehaviour
 {
     public Sphere sphere;
 
-    public void Start()
+    public void Update()
     {
-        throw new NotImplementedException();
+        sphere.position = transform.position;
+        sphere.radius = transform.localScale.x * 0.5f;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = sphere.material.color;
+        Gizmos.DrawWireSphere(sphere.position, sphere.radius);
     }
 }

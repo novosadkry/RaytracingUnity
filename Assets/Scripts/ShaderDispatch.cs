@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -20,7 +21,7 @@ public class ShaderDispatch : MonoBehaviour
     public bool renderInSceneView;
     public int maxBounce;
     public int raysPerPixel;
-    public List<Sphere> spheres;
+    public List<SphereObject> spheres;
 
     [SerializeField] private int framesRendered;
     private Material _rayMaterial;
@@ -84,10 +85,17 @@ public class ShaderDispatch : MonoBehaviour
     {
         InitMaterial(rayShader, ref _rayMaterial);
         InitMaterial(accuShader, ref _accuMaterial);
+        InitBuffer(spheres.Select(x => x.sphere).ToList(), ref _spheresBuffer);
+    }
 
-        _spheresBuffer?.Release();
-        _spheresBuffer = new ComputeBuffer(spheres.Count, Marshal.SizeOf(typeof(Sphere)), ComputeBufferType.Structured);
-        _spheresBuffer.SetData(spheres);
+    private void InitBuffer<T>(List<T> list, ref ComputeBuffer buffer) where T : struct
+    {
+        if (list is { Count: > 0 })
+        {
+            buffer?.Release();
+            buffer = new ComputeBuffer(list.Count, Marshal.SizeOf(typeof(T)), ComputeBufferType.Structured);
+            buffer.SetData(list);
+        }
     }
 
     private void InitRenderTexture(Camera cam, ref RenderTexture rt)
